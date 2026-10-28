@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { Cart, ListResponse, Product } from '../types/api'
+import type { Cart, Customer, ListResponse, Product } from '../types/api'
 
 // limit=0 asks DummyJSON for every record. `select` keeps the response small.
 export async function fetchAllProducts(signal?: AbortSignal) {
@@ -25,4 +25,15 @@ export async function fetchUserCount(signal?: AbortSignal) {
     signal,
   })
   return data.total
+}
+
+export async function fetchAllCustomers(signal?: AbortSignal) {
+  const { data } = await api.get<ListResponse<'users', Customer>>('/users', {
+    params: {
+      limit: 0,
+      select: 'firstName,lastName,email,phone,age,gender,image,role,address,company',
+    },
+    signal,
+  })
+  return data.users
 }

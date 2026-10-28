@@ -1,75 +1,57 @@
-# React + TypeScript + Vite
+# Analytics Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An admin dashboard for an online store: sign in, see key metrics and charts, and manage products and customers in searchable, sortable tables with Excel export.
 
-Currently, two official plugins are available:
+**Live demo:** https://YOUR-LINK.vercel.app  
+**Demo login:** `emilys` / `emilyspass` (or click "Fill demo credentials" on the login page)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+![Overview](docs/overview.png)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Authentication** with token-based login, protected routes, persisted session and automatic logout when the token expires
+- **KPI cards** for revenue, orders, customers and products, loaded in parallel
+- **Charts** (Recharts): sales by category, stock health donut, order value distribution, best sellers
+- **Products and Customers tables** (TanStack Table v9): debounced search, column filters, sorting, pagination with page size
+- **Excel export** of the current filtered and sorted rows
+- **Loading skeletons, error states with retry, empty states**
+- **Responsive layout** with a slide-in sidebar on mobile
+- **Route-level code splitting**: chart, table and Excel code only load when needed
 
-## Expanding the ESLint configuration
+| Products | Customers |
+| --- | --- |
+| ![Products](docs/products.png) | ![Customers](docs/customers.png) |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+React 19, TypeScript, Vite, Tailwind CSS v4, React Router, Zustand, Axios, TanStack Table v9, Recharts, write-excel-file. Data from the [DummyJSON](https://dummyjson.com) API.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project structure
 
 ```
+src/
+  api/          axios client with auth interceptors, API functions
+  store/        Zustand auth store (persisted)
+  hooks/        useFetch, useDashboardData, useDebouncedValue
+  lib/          shared TanStack Table feature setup
+  utils/        formatting, chart data calculations, Excel export
+  components/   layout, KPI and chart cards, charts, table components
+  pages/        Login, Overview, Products, Customers
+```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Chart data is calculated by pure functions in `utils/analytics.ts`, so components only render prepared data.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Run locally
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+```
 
+Open http://localhost:5173.
+
+## Build
+
+```bash
+npm run build
 ```

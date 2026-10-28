@@ -1,9 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import DashboardLayout from './components/layout/DashboardLayout'
 import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
-import ComingSoonPage from './pages/ComingSoonPage'
+import PageLoader from './components/PageLoader'
+
+// Pages load on demand, so the login screen doesn't download chart and table code
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+const CustomersPage = lazy(() => import('./pages/CustomersPage'))
 
 export default function App() {
   return (
@@ -14,9 +19,30 @@ export default function App() {
         {/* Everything inside here requires login and uses the dashboard layout */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/products" element={<ComingSoonPage title="Products table" step="step 4" />} />
-            <Route path="/customers" element={<ComingSoonPage title="Customers" step="step 4" />} />
+            <Route
+              path="/"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <DashboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ProductsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <CustomersPage />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
 

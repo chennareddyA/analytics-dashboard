@@ -37,3 +37,17 @@ export type ListResponse<K extends string, T> = {
   skip: number
   limit: number
 } & Record<K, T[]>
+
+export type Customer = {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  age: number
+  gender: string
+  image: string
+  role: string
+  address: { city: string; state: string; country: string }
+  company: { name: string; title: string }
+}
