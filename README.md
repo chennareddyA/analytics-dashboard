@@ -2,7 +2,7 @@
 
 An admin dashboard for an online store: sign in, see key metrics and charts, and manage products and customers in searchable, sortable tables with Excel export.
 
-**Live demo:** https://YOUR-LINK.vercel.app  
+**Live demo:** chennareddy-dashboard.vercel.app 
 **Demo login:** `emilys` / `emilyspass` (or click "Fill demo credentials" on the login page)
 
 ![Overview](docs/overview.png)
