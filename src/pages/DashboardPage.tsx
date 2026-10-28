@@ -1,27 +1,80 @@
-import { useAuthStore } from '../store/authStore'
+import { useMemo } from 'react'
+import { useDashboardData } from '../hooks/useDashboardData'
+import KpiCard, { KpiCardSkeleton } from '../components/KpiCard'
+import ErrorState from '../components/ErrorState'
+import { CartIcon, BoxIcon, DollarIcon, UsersIcon } from '../components/Icons'
+import { formatCurrency, formatNumber } from '../utils/format'
 
-// Temporary page. In the next step this becomes the real dashboard layout.
+const LOW_STOCK = 10
+
 export default function DashboardPage() {
-  const user = useAuthStore((s) => s.user)
-  const logout = useAuthStore((s) => s.logout)
+  const { data, loading, error, retry } = useDashboardData()
+
+  // Work out the KPI numbers once, only when the data changes
+  const stats = useMemo(() => {
+    if (!data) return null
+    const revenue = data.carts.reduce((sum, c) => sum + c.discountedTotal, 0)
+    const orders = data.carts.length
+    const unitsSold = data.carts.reduce((sum, c) => sum + c.totalQuantity, 0)
+    const lowStock = data.products.filter((p) => p.stock < LOW_STOCK).length
+    const categories = new Set(data.products.map((p) => p.category)).size
+    return {
+      revenue,
+      orders,
+      avgOrder: orders ? revenue / orders : 0,
+      unitsSold,
+      customers: data.userCount,
+      products: data.products.length,
+      lowStock,
+      categories,
+    }
+  }, [data])
+
+  if (error) return <ErrorState message={error} onRetry={retry} />
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8">
-      <div className="mx-auto flex max-w-3xl items-center justify-between rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="flex items-center gap-4">
-          {user?.image && <img src={user.image} alt="" className="size-12 rounded-full bg-slate-100" />}
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Welcome, {user?.firstName}</h1>
-            <p className="text-sm text-slate-500">{user?.email}</p>
-          </div>
-        </div>
-        <button
-          onClick={logout}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Log out
-        </button>
-      </div>
-    </main>
+    <div className="space-y-6">
+      <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {loading || !stats ? (
+          Array.from({ length: 4 }, (_, i) => <KpiCardSkeleton key={i} />)
+        ) : (
+          <>
+            <KpiCard
+              label="Revenue"
+              value={formatCurrency(stats.revenue)}
+              detail={`Avg order ${formatCurrency(stats.avgOrder)}`}
+              icon={DollarIcon}
+              tone="indigo"
+            />
+            <KpiCard
+              label="Orders"
+              value={formatNumber(stats.orders)}
+              detail={`${formatNumber(stats.unitsSold)} units sold`}
+              icon={CartIcon}
+              tone="emerald"
+            />
+            <KpiCard
+              label="Customers"
+              value={formatNumber(stats.customers)}
+              detail="Registered accounts"
+              icon={UsersIcon}
+              tone="sky"
+            />
+            <KpiCard
+              label="Products"
+              value={formatNumber(stats.products)}
+              detail={`${stats.lowStock} low in stock, ${stats.categories} categories`}
+              icon={BoxIcon}
+              tone="amber"
+            />
+          </>
+        )}
+      </section>
+
+      {/* Charts arrive in step 3 */}
+      <section className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-sm text-slate-500">
+        Charts coming in step 3
+      </section>
+    </div>
   )
 }
