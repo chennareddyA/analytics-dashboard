@@ -17,6 +17,8 @@ export type CartItem = {
   price: number
   quantity: number
   total: number
+  discountedTotal?: number
+  thumbnail?: string
 }
 
 // DummyJSON calls them carts; on the dashboard we treat each cart as an order
